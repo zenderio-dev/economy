@@ -1,3 +1,5 @@
+import { isEligible } from './selection.mjs';
+
 // All values are illustrative assumptions for a monthly sales plan.
 const activities = {
   service: { name: 'студия услуг', price: 2500, units: 45, variable: 450, fixed: 42000 },
@@ -77,7 +79,7 @@ export function buildExample(answers) {
 
 export function compareFinances(answers, ranking) {
   const { activity, scale, plan, profiles } = buildExample(answers);
-  const eligibleKeys = new Set(ranking.filter(row => row.excluded.length === 0).map(row => row.key));
+  const eligibleKeys = new Set(ranking.filter(isEligible).map(row => row.key));
   const showsPublicJointStock = eligibleKeys.has('pao');
   const rows = profiles.flatMap(profile => {
     const isPublicJointStock = profile.key === 'jsc' && showsPublicJointStock;

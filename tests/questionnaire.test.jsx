@@ -60,6 +60,13 @@ test('требует ответы и показывает рекомендаци
   expect(screen.queryByRole('table')).toBeNull();
   submit();
   expect(screen.getByRole('heading', { name: /^Рекомендация: ООО/ })).toBeTruthy();
+
+  await choose(user, 'Планируете публично размещать акции?', 'Да');
+  answerNumber('Бюджет на уставный капитал, ₽', '100000');
+  await choose(user, 'Готовы сформировать коллегиальный орган управления из пяти и более человек?', 'Нужно уточнить');
+  submit();
+  expect(screen.getByRole('heading', { name: 'Нужно уточнить условия' })).toBeTruthy();
+  expect(screen.queryByRole('table')).toBeNull();
 });
 
 test('выбирает с клавиатуры и возвращает фокус при закрытии', async () => {
@@ -91,8 +98,14 @@ test('условия скрытой ветки не влияют на резул
   expect(screen.getByRole('heading', { name: /подходящей формы нет/ })).toBeTruthy();
   expect(container.querySelector('details').open).toBe(true);
 
+  await choose(user, 'Участники владеют этой недвижимостью?', 'Нужно уточнить');
+  submit();
+  expect(screen.getByRole('heading', { name: 'Нужно уточнить условия' })).toBeTruthy();
+  expect(screen.getByText('Подтвердите права участников на недвижимость.')).toBeTruthy();
+
   await choose(user, 'Что хотите организовать?', 'Совместные закупки или другие общие потребности');
   expect(screen.queryByRole('button', { name: /Участники владеют этой недвижимостью/ })).toBeNull();
+  await choose(user, 'Число и состав учредителей соответствуют требованиям выбранного вида кооператива?', 'Да');
   submit();
   expect(screen.getByRole('heading', { name: /^Рекомендация: Потребительский кооператив/ })).toBeTruthy();
 });

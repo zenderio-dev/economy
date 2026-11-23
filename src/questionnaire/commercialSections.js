@@ -1,4 +1,4 @@
-import { owners } from './commonFields.js';
+import { confirmationOptions, owners } from './commonFields.js';
 
 const commercialDetails = {
   title: 'Деятельность и участники',
@@ -52,6 +52,13 @@ const governance = {
       options: [['private', 'Нет'], ['public', 'Да']],
     },
     {
+      name: 'publicBoard',
+      label: 'Готовы сформировать коллегиальный орган управления из пяти и более человек?',
+      help: 'Для ПАО это обязательное условие. Исполнительное управление можно поручить директору.',
+      options: confirmationOptions,
+      when: ({ market }) => market === 'public',
+    },
+    {
       name: 'admin',
       label: 'Какой учёт готовы вести?',
       options: [['0', 'Минимум формальностей'], ['1', 'Корпоративный учёт'], ['2', 'Учёт с регистратором']],
@@ -66,17 +73,31 @@ const governance = {
 
 const personalWork = {
   name: 'personalWork',
-  label: 'Будут ли владельцы сами работать в проекте?',
-  options: [['yes', 'Большинство участвует лично'], ['no', 'Работу выполняют сотрудники']],
+  label: 'Будут ли члены хозяйства лично участвовать в его деятельности?',
+  options: [['yes', 'Да'], ['no', 'Нет']],
+};
+
+const farmingActivity = {
+  name: 'farmingActivity',
+  label: 'Будет ли проект вести хозяйственную деятельность в области сельского хозяйства?',
+  help: 'Например, выращивать сельхозпродукцию. Одна лишь перепродажа чужих товаров не подтверждает это условие.',
+  options: confirmationOptions,
+};
+
+const cooperativeWork = {
+  name: 'cooperativeWorkFit',
+  label: 'Будете соблюдать требование к личному труду членов кооператива?',
+  help: 'Число членов без личного трудового участия не должно превышать четверти от числа лично работающих членов.',
+  options: confirmationOptions,
 };
 
 export const commercialSections = {
   business: [commercialDetails, governance],
-  agriculture: [commercialDetails, { ...governance, fields: [personalWork, ...governance.fields] }],
+  agriculture: [commercialDetails, { ...governance, fields: [farmingActivity, personalWork, ...governance.fields] }],
   team: [commercialDetails, {
     ...governance,
     fields: [
-      personalWork,
+      cooperativeWork,
       {
         name: 'voting',
         label: 'Как хотите принимать решения?',

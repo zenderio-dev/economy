@@ -1,4 +1,4 @@
-import { forms } from '../domain/selection.mjs';
+import { forms, isEligible } from '../domain/selection.mjs';
 import { guidance } from '../domain/guidance.mjs';
 import { FinanceExample } from './FinanceExample.jsx';
 import './results.css';
@@ -62,8 +62,8 @@ function Comparison({ ranking, expanded }) {
         {ranking.map(row => (
           <article className="comparison-card" key={row.key}>
             <h3>{forms[row.key][0]}</h3>
-            <p>{row.excluded.length ? 'Есть ограничения' : `Баллы: ${formatScore(row.score)}`}</p>
-            <ul>{[...row.excluded, ...row.reasons].map(reason => <li key={reason}>{reason}</li>)}</ul>
+            <p>{row.excluded.length ? 'Есть ограничения' : row.pending.length ? 'Нужно уточнить условия' : `Баллы: ${formatScore(row.score)}`}</p>
+            <ul>{[...row.excluded, ...row.pending, ...row.reasons].map(reason => <li key={reason}>{reason}</li>)}</ul>
           </article>
         ))}
       </div>
@@ -71,12 +71,14 @@ function Comparison({ ranking, expanded }) {
   );
 }
 
-function Recommendation({ best }) {
+function Recommendation({ best, needsClarification }) {
   if (!best) {
     return (
       <>
-        <h2 id="result-title">При этих условиях подходящей формы нет</h2>
-        <p className="result-lead">В сравнении ниже указаны причины, по которым формы не подходят.</p>
+        <h2 id="result-title">{needsClarification ? 'Нужно уточнить условия' : 'При этих условиях подходящей формы нет'}</h2>
+        <p className="result-lead">
+          {needsClarification ? 'В сравнении ниже указано, какие сведения нужны для рекомендации.' : 'В сравнении ниже указаны причины, по которым формы не подходят.'}
+        </p>
       </>
     );
   }
@@ -107,17 +109,15 @@ export function Results({ answers, ranking }) {
     );
   }
 
-  const best = first.excluded.length === 0 ? first : null;
+  const best = isEligible(first) ? first : null;
+  const needsClarification = first.excluded.length === 0 && first.pending.length > 0;
 
   return (
     <div className="result-stack">
       <article className="panel result-panel" aria-labelledby="result-title">
-        <Recommendation best={best} />
+        <Recommendation best={best} needsClarification={needsClarification} />
         {answers.activity === 'special' && (
           <p className="result-note">Проверьте, нужны ли для выбранной деятельности лицензия или специальная форма.</p>
-        )}
-        {answers.propertyRights === 'unknown' && (
-          <p className="result-note">Для ТСН нужно подтвердить права участников на недвижимость.</p>
         )}
         <Comparison ranking={ranking} expanded={!best} />
       </article>

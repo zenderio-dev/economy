@@ -5,3 +5,5 @@ export const owners = {
   min: 1,
   step: 1,
 };
+
+export const confirmationOptions = [['yes', 'Да'], ['no', 'Нет'], ['unknown', 'Нужно уточнить']];
