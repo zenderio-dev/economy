@@ -1,0 +1,15 @@
+.button {
+  min-height: 3.125rem;
+  padding: 0.65rem 1.25rem;
+  border: 1px solid var(--brand);
+  border-radius: 0.5rem;
+  background: var(--brand);
+  color: white;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.button:hover {
+  border-color: var(--brand-dark);
+  background: var(--brand-dark);
+}

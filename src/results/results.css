@@ -1,0 +1,138 @@
+.result-note,
+.finance-caption {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.result-panel,
+.finance-panel {
+  display: grid;
+  gap: 1rem;
+  scroll-margin-block: 1rem;
+}
+
+.result-panel {
+  border-top: 3px solid var(--brand);
+}
+
+.result-lead {
+  font-size: 1.0625rem;
+  color: var(--brand-dark);
+}
+
+.result-guidance {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem 1.125rem;
+  border-radius: 0.75rem;
+  background: var(--tint);
+}
+
+.comparison {
+  min-width: 0;
+  border-top: 1px solid var(--border);
+  padding-top: 0.75rem;
+}
+
+.comparison summary {
+  padding-block: 0.35rem;
+  color: var(--brand-dark);
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: 0.75rem;
+  margin-top: 0.8rem;
+}
+
+.comparison-card {
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  overflow-wrap: anywhere;
+}
+
+.comparison-card h3 {
+  margin-bottom: 0.65rem;
+}
+
+.assessment-list {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.assessment-list li {
+  margin: 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+[data-status="confirmed"] {
+  --status-color: var(--brand);
+}
+
+[data-status="pending"] {
+  --status-color: #85521c;
+}
+
+[data-status="blocked"] {
+  --status-color: var(--danger);
+}
+
+.status-label {
+  color: var(--status-color, var(--text));
+  font-weight: 700;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+
+.table-wrap:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.table-wrap :where(th, td) {
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.table-wrap :where(th, td):first-child {
+  text-align: left;
+}
+
+.table-wrap :where(th, td):not(:first-child) {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.table-wrap thead,
+.finance-total {
+  background: var(--tint);
+  font-weight: 700;
+}
+
+.table-wrap tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+@media (max-width: 42rem) {
+  .table-wrap :where(th, td) {
+    padding-inline: 0.65rem;
+  }
+}

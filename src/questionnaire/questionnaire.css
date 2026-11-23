@@ -1,0 +1,103 @@
+.panel-heading {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-section > p {
+  color: var(--muted);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem 1.5rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.field-wide {
+  grid-column: 1 / -1;
+}
+
+.form-section {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+  margin: 0;
+  padding: 1.3rem 0 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+:is(.choice-group, .form-section) + .form-section {
+  margin-top: 1.5rem;
+}
+
+.choice-group {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.choice-group legend {
+  margin-bottom: 0.75rem;
+  padding: 0;
+  font-weight: 650;
+}
+
+.choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.choice-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  min-height: 2.75rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.choice-option:hover,
+.choice-option:has(:checked) {
+  border-color: var(--brand);
+  background: var(--tint);
+}
+
+.choice-option input {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  margin: 0.25em 0 0;
+  accent-color: var(--brand);
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 42rem) {
+  .form-grid,
+  .choice-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 27rem) {
+  .form-actions .button {
+    flex: 1 1 100%;
+  }
+}
