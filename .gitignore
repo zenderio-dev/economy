@@ -1,0 +1,7 @@
+node_modules/
+.env
+.env.*
+!.env.example
+*.log
+# Unused page from the initial single-file prototype
+/index.html
