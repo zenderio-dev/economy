@@ -47,6 +47,7 @@ function SpecialResult({ form, assessment }) {
       </ul>
       <div className="result-guidance">
         <p>{assessment.economic}</p>
+        <p className="result-note">Вы выбрали специальную форму сами. Здесь проверяются её условия; этот результат не является рейтингом среди всех организаций.</p>
         <NextSteps steps={assessment.steps} source={assessment.source} />
         <p className="result-note">Подтвердите ответы документами и проверьте отраслевые условия перед регистрацией.</p>
       </div>
@@ -58,6 +59,7 @@ function Comparison({ ranking, expanded }) {
   return (
     <details className="comparison" open={expanded || undefined}>
       <summary>Сравнить формы и посмотреть ограничения</summary>
+      <p className="result-note">Сначала проверяются обязательные условия, затем баллы. Формы с ограничениями и неподтверждёнными условиями не участвуют в финансовом сравнении.</p>
       <div className="comparison-grid">
         {ranking.map(row => (
           <article className="comparison-card" key={row.key}>
@@ -79,6 +81,8 @@ function Recommendation({ best, needsClarification }) {
         <p className="result-lead">
           {needsClarification ? 'В сравнении ниже указано, какие сведения нужны для рекомендации.' : 'В сравнении ниже указаны причины, по которым формы не подходят.'}
         </p>
+        <p>Вернитесь к анкете и измените противоречивые ответы или подтвердите неизвестные условия. Оценка в баллах не отменяет обязательные требования.</p>
+        <a href="#project-questionnaire">Вернуться к ответам</a>
       </>
     );
   }
@@ -90,6 +94,7 @@ function Recommendation({ best, needsClarification }) {
     <>
       <h2 id="result-title">Рекомендация: {name}</h2>
       <p className="result-lead">{description}</p>
+      <p>Оценка соответствия условиям: <strong>{formatScore(best.score)} балла</strong>. Это баллы учебной модели, а не вероятность успеха.</p>
       {best.top.length > 0 && <p>Наибольший вклад в оценку дали критерии: {best.top.join(', ').toLocaleLowerCase('ru-RU')}.</p>}
       <div className="result-guidance">
         <p>{info.economics}</p>
@@ -101,10 +106,12 @@ function Recommendation({ best, needsClarification }) {
 
 export function Results({ answers, ranking }) {
   const [first] = ranking;
+  if (!first) return <p className="panel">Выберите цель и форму в анкете, затем получите рекомендацию.</p>;
   if (first.assessment) {
     return (
       <div className="result-stack">
         <SpecialResult form={forms[first.key]} assessment={first.assessment} />
+        <FinanceExample answers={answers} ranking={ranking} />
       </div>
     );
   }
@@ -116,6 +123,9 @@ export function Results({ answers, ranking }) {
     <div className="result-stack">
       <article className="panel result-panel" aria-labelledby="result-title">
         <Recommendation best={best} needsClarification={needsClarification} />
+        {best && ranking.filter(row => isEligible(row) && row.score === best.score).length > 1 && (
+          <p className="result-note">Несколько форм получили одинаковую оценку. Первая показана по порядку модели; посмотрите различия в сравнении ниже.</p>
+        )}
         {answers.activity === 'special' && (
           <p className="result-note">Проверьте, нужны ли для выбранной деятельности лицензия или специальная форма.</p>
         )}

@@ -53,6 +53,7 @@ function goalCandidate(key, criteria, limits, unanswered) {
 }
 
 export function isEligible(row) {
+  if (row.assessment) return row.assessment.status === 'preliminary';
   return row.excluded.length === 0 && row.pending.length === 0;
 }
 
@@ -79,7 +80,7 @@ function businessCandidates(answers) {
     ],
     llc: [
       [owners > 50, 'Лимит ООО — 50 участников.'],
-      [needsShares, 'В планах нужны акции.'],
+      [needsShares, 'Вы выбрали выпуск акций. ООО не выпускает акции — для этого рассматривается АО.'],
       [capital < 10_000, 'На уставный капитал ООО нужно от 10 000 ₽.'],
     ],
     jsc: [[
@@ -163,6 +164,7 @@ function nonprofitCandidates(answers) {
       [impossibleMixedFounders, 'Для смешанного состава нужны как минимум один гражданин и одна организация.'],
       [!matchesMembership, membership[3]],
       [!matchesGoal, 'Назначение формы не соответствует выбранной основной цели.'],
+      [answers.fundingSource === 'fees' && answers.membership !== 'yes', 'Вы выбрали членские взносы, но отказались от членства. Укажите другой источник средств или членскую форму.'],
       [key === 'institution' && founders !== 1, 'Учреждение создаёт один собственник. Соучредительство не допускается.'],
       [key === 'association' && founders < 2, 'Для ассоциации нужно не менее двух учредителей.'],
       [isPublicAssociation && possibleIndividuals < 3, 'Для общественного объединения нужно не менее трёх учредителей-физлиц.'],
@@ -208,11 +210,7 @@ function sharedCandidates({ sharedGoal, membership, propertyRights, owners, cons
 function farmCandidate(answers) {
   const multipleMembers = Number(answers.owners) > 1;
   const personalWork = answers.personalWork === 'yes';
-  return goalCandidate('farm', [
-    [answers.farmingActivity === 'yes', 60, 'Сельскохозяйственная деятельность'],
-    [personalWork, 30, 'Личное участие'],
-    [multipleMembers, 10, 'Совместное хозяйство'],
-  ], [
+  return goalCandidate('farm', specializedCriteria(answers, 'farm'), [
     [!multipleMembers, 'Эта модель КФХ учитывает совместное хозяйство. Для самостоятельной работы уточните регистрацию КФХ без юридического лица.'],
     [!personalWork, 'Для КФХ требуется личное участие членов.'],
     [answers.farmingActivity === 'no', 'Для КФХ нужна совместная хозяйственная деятельность в области сельского хозяйства.'],
@@ -225,12 +223,7 @@ function farmCandidate(answers) {
 
 function cooperativeCandidate(answers) {
   const enoughMembers = Number(answers.owners) >= 5;
-  const workRequirementMet = answers.cooperativeWorkFit === 'yes';
-  return goalCandidate('coop', [
-    [workRequirementMet, 50, 'Совместный личный труд'],
-    [answers.voting === 'equal', 40, 'Один член — один голос'],
-    [enoughMembers, 10, 'Достаточное число участников'],
-  ], [
+  return goalCandidate('coop', specializedCriteria(answers, 'coop'), [
     [!enoughMembers, 'Для производственного кооператива требуется не менее пяти членов.'],
     [answers.cooperativeWorkFit === 'no', 'Число членов без личного трудового участия не должно превышать 25% числа лично работающих членов.'],
     [answers.voting === 'capital', 'В производственном кооперативе у каждого члена один голос независимо от размера пая.'],
@@ -239,6 +232,28 @@ function cooperativeCandidate(answers) {
   ], [
     [isUnconfirmed(answers.cooperativeWorkFit), 'Уточните число лично работающих членов кооператива.'],
   ]);
+}
+
+// Same criterion weights as companies: mandatory conditions do not grant an automatic 100.
+// Coefficients describe preferences in this teaching model, not legal eligibility.
+function specializedCriteria(answers, key) {
+  const cooperative = key === 'coop';
+  const financing = theProjectRequiresShares(answers) ? 0 : answers.funding === 'partners' ? .85 : .95;
+  const control = { 0: 1, 1: .7, 2: .4 }[answers.control] ?? .5;
+  const administration = { 0: .9, 1: 1, 2: .5 }[answers.admin] ?? .5;
+  const activity = cooperative
+    ? { production: 1, service: .9, trade: .65, special: .5 }[answers.activity] ?? .5
+    : answers.farmingActivity === 'yes' ? 1 : 0;
+  const scale = { small: 1, medium: .9, large: .65 }[answers.scale] ?? .5;
+  const criteria = [
+    ['Собственность и инвестиции', 25, financing],
+    ['Управление', 20, control],
+    ['Корпоративный учёт', 15, administration],
+    ['Вид деятельности', 15, activity],
+    ['Масштаб', 15, scale],
+    ['Имущественный риск', 10, answers.risk === 'yes' ? 1 : 0],
+  ];
+  return criteria.map(([label, weight, fit]) => [true, Math.round(weight * (2 * fit - 1) * 100) / 100, label]);
 }
 
 function candidatesFor(answers) {
@@ -256,8 +271,9 @@ export function rank(answers) {
     const key = answers.specialType;
     if (!Object.hasOwn(specialProfiles, key)) return [];
     const assessment = assessSpecial(key, answers);
-    const excluded = assessment.checks.filter(({ status }) => status !== 'confirmed').map(({ label }) => label);
-    return [{ key, score: 0, excluded, pending: [], reasons: [], top: [], special: true, assessment }];
+    const excluded = assessment.checks.filter(({ status }) => status === 'blocked').map(({ label }) => label);
+    const pending = assessment.checks.filter(({ status }) => status === 'pending').map(({ label }) => label);
+    return [{ key, score: 0, excluded, pending, reasons: [], top: [], special: true, assessment }];
   }
 
   return candidatesFor(answers).sort((left, right) =>

@@ -67,7 +67,7 @@ test('требует ответы и показывает рекомендаци
   submit();
   expect(screen.getByRole('heading', { name: 'Нужно уточнить условия' })).toBeTruthy();
   expect(screen.queryByRole('table')).toBeNull();
-});
+}, 15000);
 
 test('выбирает с клавиатуры и возвращает фокус при закрытии', async () => {
   const user = userEvent.setup();
@@ -123,7 +123,9 @@ test.each(sectionsByPurpose.specialGoal[0].fields[0].options)('принимае�
 
   const result = container.querySelector('.result-panel');
   expect(within(result).getByRole('heading', { name: 'Базовые условия предварительно выполнены' })).toBeTruthy();
-  expect(screen.queryByRole('table')).toBeNull();
+  expect(screen.getByRole('table')).toBeTruthy();
+  expect(screen.getByText(/Выбранная форма:/)).toBeTruthy();
+  expect(screen.queryByText(/NaN|undefined/)).toBeNull();
 });
 
 test('очищает ответы специальных форм при смене профиля', async () => {

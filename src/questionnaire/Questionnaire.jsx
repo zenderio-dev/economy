@@ -24,7 +24,7 @@ export function Questionnaire({ onChange, onSubmit }) {
   }
 
   return (
-    <Form className="panel questionnaire" onSubmit={submit}>
+    <Form id="project-questionnaire" className="panel questionnaire" onSubmit={submit}>
       <h2 className="panel-heading">Ваш проект</h2>
       <PurposeChoices value={purpose} onChange={updateAnswer} />
       {sectionsByPurpose[purpose].map(section => (
